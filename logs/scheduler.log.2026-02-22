@@ -1,0 +1,51 @@
+2026-02-22T18:23:01.425819Z  INFO scheduler::telemetry: Event System & Telemetry initialized.
+2026-02-22T18:23:01.425856Z  INFO scheduler: Initializing Scheduler Component...
+2026-02-22T18:23:02.224395Z  INFO scheduler::telemetry: Resource Monitor - Memory: 11878MB / 15167MB, CPU: 50.98%
+2026-02-22T18:23:02.240822Z  INFO scheduler: Jobs scheduled. Starting TUI...
+2026-02-22T18:23:03.001945Z  INFO scheduler::telemetry: Resource Monitor - Memory: 11798MB / 15167MB, CPU: 37.29%
+2026-02-22T18:23:03.241043Z  INFO scheduler::job: Job f8ad737d-a6b0-453f-b1e7-fba339782e10 started running.
+2026-02-22T18:23:03.241097Z  INFO scheduler: [Worker] Executing job f8ad737d-a6b0-453f-b1e7-fba339782e10 ('Backup Database')
+2026-02-22T18:23:03.291251Z  INFO scheduler::job: Job f8ad737d-a6b0-453f-b1e7-fba339782e10 completed successfully.
+2026-02-22T18:23:03.291321Z  INFO scheduler: [Worker] Done 'Backup Database'
+2026-02-22T18:23:03.291349Z  INFO scheduler::job: Job 335362e7-7b86-47b4-8047-fa709c970c2f started running.
+2026-02-22T18:23:03.291373Z  INFO scheduler: [Worker] Executing job 335362e7-7b86-47b4-8047-fa709c970c2f ('Urgent Hotfix')
+2026-02-22T18:23:03.341524Z  INFO scheduler::job: Job 335362e7-7b86-47b4-8047-fa709c970c2f completed successfully.
+2026-02-22T18:23:03.341583Z  INFO scheduler: [Worker] Done 'Urgent Hotfix'
+2026-02-22T18:23:05.241394Z  INFO scheduler::job: Job 6a4f2ec0-b061-45fa-9874-33c11fffb5d7 started running.
+2026-02-22T18:23:05.241438Z  INFO scheduler: [Worker] Executing job 6a4f2ec0-b061-45fa-9874-33c11fffb5d7 ('Send Emails')
+2026-02-22T18:23:05.291586Z  INFO scheduler::job: Job 6a4f2ec0-b061-45fa-9874-33c11fffb5d7 completed successfully.
+2026-02-22T18:23:05.291643Z  INFO scheduler: [Worker] Done 'Send Emails'
+2026-02-22T18:26:22.674450Z  INFO scheduler::telemetry: Event System & Telemetry initialized.
+2026-02-22T18:26:22.674501Z  INFO scheduler: Initializing Scheduler Component...
+2026-02-22T18:26:23.303663Z  INFO scheduler::telemetry: Resource Monitor - Memory: 11482MB / 15167MB, CPU: 21.10%
+2026-02-22T18:26:23.314640Z  INFO scheduler: Jobs scheduled. Starting TUI...
+2026-02-22T18:26:23.894142Z  INFO scheduler::telemetry: Resource Monitor - Memory: 11482MB / 15167MB, CPU: 12.26%
+2026-02-22T18:26:24.314905Z  INFO scheduler::job: Job 86272312-cd2e-4403-90e2-7f86fe229fb5 started running.
+2026-02-22T18:26:24.314973Z  INFO scheduler: [Worker] Executing job 86272312-cd2e-4403-90e2-7f86fe229fb5 ('Backup Database')
+2026-02-22T18:26:24.365139Z  INFO scheduler::job: Job 86272312-cd2e-4403-90e2-7f86fe229fb5 completed successfully.
+2026-02-22T18:26:24.365180Z  INFO scheduler: [Worker] Done 'Backup Database'
+2026-02-22T18:26:24.365199Z  INFO scheduler::job: Job df251d22-c2f3-4632-ab72-0cc28fff18c4 started running.
+2026-02-22T18:26:24.365214Z  INFO scheduler: [Worker] Executing job df251d22-c2f3-4632-ab72-0cc28fff18c4 ('Urgent Hotfix')
+2026-02-22T18:26:24.415386Z  INFO scheduler::job: Job df251d22-c2f3-4632-ab72-0cc28fff18c4 completed successfully.
+2026-02-22T18:26:24.415454Z  INFO scheduler: [Worker] Done 'Urgent Hotfix'
+2026-02-22T18:26:26.315217Z  INFO scheduler::job: Job c96c7362-da34-4c07-9dde-c50cc249441a started running.
+2026-02-22T18:26:26.315261Z  INFO scheduler: [Worker] Executing job c96c7362-da34-4c07-9dde-c50cc249441a ('Send Emails')
+2026-02-22T18:26:26.365427Z  INFO scheduler::job: Job c96c7362-da34-4c07-9dde-c50cc249441a completed successfully.
+2026-02-22T18:26:26.365466Z  INFO scheduler: [Worker] Done 'Send Emails'
+2026-02-22T18:43:52.761494Z  INFO scheduler::telemetry: Event System & Telemetry initialized.
+2026-02-22T18:43:52.761532Z  INFO scheduler: Initializing Scheduler Component...
+2026-02-22T18:43:53.453558Z  INFO scheduler::telemetry: Resource Monitor - Memory: 10503MB / 15167MB, CPU: 36.09%
+2026-02-22T18:43:53.463832Z  INFO scheduler: Jobs scheduled. Starting TUI...
+2026-02-22T18:43:54.065935Z  INFO scheduler::telemetry: Resource Monitor - Memory: 10505MB / 15167MB, CPU: 12.56%
+2026-02-22T18:43:54.464232Z  INFO scheduler::job: Job 70647c54-6dab-41ff-82c5-94bec484bcf6 started running.
+2026-02-22T18:43:54.464337Z  INFO scheduler: [Worker] Executing job 70647c54-6dab-41ff-82c5-94bec484bcf6 ('Backup Database')
+2026-02-22T18:43:54.514481Z  INFO scheduler::job: Job 70647c54-6dab-41ff-82c5-94bec484bcf6 completed successfully.
+2026-02-22T18:43:54.514537Z  INFO scheduler: [Worker] Done 'Backup Database'
+2026-02-22T18:43:54.514567Z  INFO scheduler::job: Job a0f42d49-d58d-492a-a4ad-232de9965c95 started running.
+2026-02-22T18:43:54.514587Z  INFO scheduler: [Worker] Executing job a0f42d49-d58d-492a-a4ad-232de9965c95 ('Urgent Hotfix')
+2026-02-22T18:43:54.564723Z  INFO scheduler::job: Job a0f42d49-d58d-492a-a4ad-232de9965c95 completed successfully.
+2026-02-22T18:43:54.564800Z  INFO scheduler: [Worker] Done 'Urgent Hotfix'
+2026-02-22T18:43:56.464443Z  INFO scheduler::job: Job 5b693187-1b29-4ee7-af3c-8d72073f6e5d started running.
+2026-02-22T18:43:56.464488Z  INFO scheduler: [Worker] Executing job 5b693187-1b29-4ee7-af3c-8d72073f6e5d ('Send Emails')
+2026-02-22T18:43:56.514648Z  INFO scheduler::job: Job 5b693187-1b29-4ee7-af3c-8d72073f6e5d completed successfully.
+2026-02-22T18:43:56.514696Z  INFO scheduler: [Worker] Done 'Send Emails'
