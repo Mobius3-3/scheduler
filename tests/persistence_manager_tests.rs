@@ -4,14 +4,12 @@ mod tests {
     use scheduler::job::Status;
     use scheduler::persistence_manager::PersistenceManager;
     use std::fs;
-    use std::fs::File;
     use std::thread;
     use std::time::Duration;
     use uuid::Uuid;
 
     fn get_temp_path() -> String {
-        let path = "scheduler_jobs.json".to_string();
-        path
+        format!("scheduler_jobs_{}.json", Uuid::new_v4())
     }
 
     #[test]
@@ -40,13 +38,13 @@ mod tests {
     #[test]
     fn test_snapshot_channel_writes_to_disk() {
         let temp_file = get_temp_path();
-        File::create(&temp_file).expect("Failed to create file");
         let manager = PersistenceManager::new(&temp_file);
 
-        let sender = manager.start_memory_snapsnot();
+        let sender = manager.start_memory_snapshot();
 
-        let job1 = Job::new(1000, 1, "Task 1", "func1");
-        let mut job2 = Job::new(2000, 2, "Task 2", "func2");
+        let now = chrono::Utc::now().timestamp();
+        let job1 = Job::new(now + 1000, 1, "Task 1", "func1").unwrap();
+        let mut job2 = Job::new(now + 2000, 2, "Task 2", "func2").unwrap();
         job2.status = Status::Running;
 
         let snapshot = vec![job1.clone(), job2.clone()];

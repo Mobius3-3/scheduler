@@ -18,7 +18,7 @@ impl PersistenceManager {
         }
     }
 
-    pub fn start_memory_snapsnot(&self) -> Sender<Vec<Job>> {
+    pub fn start_memory_snapshot(&self) -> Sender<Vec<Job>> {
         let (tx, rx) = mpsc::channel();
         let path = self.storage_path.clone();
 
@@ -27,8 +27,13 @@ impl PersistenceManager {
             for jobs_snapshot in rx {
                 match serde_json::to_string_pretty(&jobs_snapshot) {
                     Ok(json) => {
-                        if let Err(e) = fs::write(&path, json) {
-                            eprintln!("Error: Failed to write to disk: {}", e);
+                        let temp_path = path.with_extension("tmp");
+                        if let Err(e) = fs::write(&temp_path, &json) {
+                            eprintln!("Error: Failed to write to temp disk: {}", e);
+                            continue;
+                        }
+                        if let Err(e) = fs::rename(&temp_path, &path) {
+                            eprintln!("Error: Failed to swap persistent file: {}", e);
                         }
                     }
                     Err(e) => eprintln!("Failed to serialize job: {}", e),
