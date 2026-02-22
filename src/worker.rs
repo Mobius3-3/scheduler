@@ -1,9 +1,6 @@
-use std::time::{SystemTime, UNIX_EPOCH};
 use std::collections::HashMap;
-use std::{thread, time::Duration};
 
 use crate::job::Job;
-use crate::queue::QueueManager;
 
 /// Type alias for a function pointer that takes no arguments and returns nothing
 type JobFn = fn();
@@ -31,38 +28,16 @@ impl Worker {
             println!("[Worker] Executing: {}", job.function);
             func(); // Execute the function pointer
         } else {
-            eprintln!("[Worker] Error: No function registered for '{}'", job.function);
+            eprintln!(
+                "[Worker] Error: No function registered for '{}'",
+                job.function
+            );
         }
     }
 
-    /// Starts a simple polling loop to process jobs from the queue
-    pub fn start(&self, queue: &mut QueueManager) {
-        loop {
-                    let now = SystemTime::now()
-                        .duration_since(UNIX_EPOCH)
-                        .unwrap()
-                        .as_secs() as i64;
-
-                    let ready_jobs = queue.pop_ready(now);
-
-                    for job in ready_jobs {
-                        self.run_job(&job);
-                    }
-
-                    // Prevent 100% CPU usage during idle
-                    thread::sleep(Duration::from_millis(100));
-            }
-    }
-
-    /// Processes all currently ready jobs once and returns (for testing/manual polling)
-    pub fn process_once(&self, queue: &mut QueueManager) {
-        let now = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_secs() as i64;
-
-        let ready_jobs = queue.pop_ready(now);
-        for job in ready_jobs {
+    /// Starts a simple blocking loop to process jobs from the channel
+    pub fn start(&self, rx: std::sync::mpsc::Receiver<Job>) {
+        for job in rx {
             self.run_job(&job);
         }
     }
