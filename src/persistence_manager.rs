@@ -5,7 +5,7 @@ use std::{
     thread,
 };
 
-use crate::job::{self, Job};
+use crate::job::Job;
 
 pub struct PersistenceManager {
     pub storage_path: PathBuf,
