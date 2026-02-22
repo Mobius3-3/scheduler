@@ -46,4 +46,7 @@ fn main() {
     // Wait enough time for all jobs to be processed
     thread::sleep(Duration::from_secs(4));
     println!("Scheduler simulation complete. Shutting down.");
+
+    // Stop the engine gracefully
+    engine.stop();
 }

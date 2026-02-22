@@ -28,4 +28,6 @@ fn engine_dispatches_jobs_on_time() {
     // The 'future' job should arrive after its time point (we give it up to 2 seconds to account for sleeping)
     let job2 = rx.recv_timeout(Duration::from_secs(2)).unwrap();
     assert_eq!(job2.description, "future job");
+
+    engine.stop();
 }
