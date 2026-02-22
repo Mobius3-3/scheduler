@@ -11,10 +11,15 @@ use std::time::Duration;
 mod tests {
     use super::*;
     // We use a static atomic to track if the function was called
-    static WAS_CALLED: AtomicBool = AtomicBool::new(false);
+    static WAS_CALLED_REGISTRY: AtomicBool = AtomicBool::new(false);
+    static WAS_CALLED_CHANNEL: AtomicBool = AtomicBool::new(false);
 
-    fn test_task(_log_tx: std::sync::mpsc::Sender<String>) {
-        WAS_CALLED.store(true, Ordering::SeqCst);
+    fn test_task_registry(_log_tx: std::sync::mpsc::Sender<String>) {
+        WAS_CALLED_REGISTRY.store(true, Ordering::SeqCst);
+    }
+
+    fn test_task_channel(_log_tx: std::sync::mpsc::Sender<String>) {
+        WAS_CALLED_CHANNEL.store(true, Ordering::SeqCst);
     }
 
     #[test]
@@ -22,7 +27,7 @@ mod tests {
         let mut worker = Worker::new();
 
         // 1. Register our test function
-        worker.register("test_func", test_task);
+        worker.register("test_func", test_task_registry);
 
         // 2. Create a job that is ready to run (execution_time = 0)
         let mut job = Job {
@@ -38,12 +43,12 @@ mod tests {
 
         // 3. Reset the flag and run the job
         let (log_tx, _log_rx) = mpsc::channel();
-        WAS_CALLED.store(false, Ordering::SeqCst);
+        WAS_CALLED_REGISTRY.store(false, Ordering::SeqCst);
         worker.run_job(&mut job, log_tx);
 
         // 4. Assert the function was triggered
         assert!(
-            WAS_CALLED.load(Ordering::SeqCst),
+            WAS_CALLED_REGISTRY.load(Ordering::SeqCst),
             "The registered function should have been executed"
         );
     }
@@ -71,10 +76,10 @@ mod tests {
     #[test]
     fn test_worker_start_channel() {
         let mut worker = Worker::new();
-        worker.register("test_func", test_task);
+        worker.register("test_func", test_task_channel);
 
         let (tx, rx) = mpsc::channel();
-        WAS_CALLED.store(false, Ordering::SeqCst);
+        WAS_CALLED_CHANNEL.store(false, Ordering::SeqCst);
 
         let (log_tx, _log_rx) = mpsc::channel();
 
@@ -101,7 +106,7 @@ mod tests {
 
         // Assert the function was executed
         assert!(
-            WAS_CALLED.load(Ordering::SeqCst),
+            WAS_CALLED_CHANNEL.load(Ordering::SeqCst),
             "The registered function should have been executed via channel"
         );
     }
