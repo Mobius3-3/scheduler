@@ -4,7 +4,6 @@ use scheduler::queue::QueueManager;
 use scheduler::tui;
 use std::sync::{Arc, Mutex, mpsc};
 use std::thread;
-use std::time::Duration;
 
 fn main() -> std::io::Result<()> {
     println!("Initializing Scheduler Component...");
@@ -13,20 +12,21 @@ fn main() -> std::io::Result<()> {
     let (worker_tx, worker_rx) = mpsc::channel();
     let (log_tx, log_rx) = mpsc::channel();
 
-    let engine = TimePriorityEngine::new_with_log(
-        Arc::clone(&queue),
-        worker_tx.clone(),
-        log_tx.clone(),
-    );
+    let engine =
+        TimePriorityEngine::new_with_log(Arc::clone(&queue), worker_tx.clone(), log_tx.clone());
     engine.start();
 
-    // Start a simple worker simulation thread
+    // Start the real Worker in a separate thread
     thread::spawn(move || {
-        while let Ok(job) = worker_rx.recv() {
-            let _ = log_tx.send(format!("[Worker] Executing '{}'", job.description));
-            thread::sleep(Duration::from_millis(50));
-            let _ = log_tx.send(format!("[Worker] Done '{}'", job.description));
-        }
+        let mut worker = scheduler::worker::Worker::new();
+        // Register actual functions from worker.rs (or inline closures)
+        worker.register("backup_fn", scheduler::worker::backup_db);
+        worker.register("email_fn", scheduler::worker::send_email);
+        worker.register("hotfix_fn", |log_tx: std::sync::mpsc::Sender<String>| {
+            let _ = log_tx.send(" [Task] Applying urgent hotfix...".to_string());
+        });
+
+        worker.start(worker_rx, log_tx);
     });
 
     // Previous code: schedule demo jobs (unchanged logic)
@@ -43,7 +43,12 @@ fn main() -> std::io::Result<()> {
         }
     }
 
-    let result = tui::run_tui(queue, log_rx, worker_tx);
+    let result = tui::run_tui(
+        queue,
+        log_rx,
+        worker_tx,
+        vec!["backup_fn".into(), "email_fn".into(), "hotfix_fn".into()],
+    );
     engine.stop();
     result
 }
