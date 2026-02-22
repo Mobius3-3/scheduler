@@ -2,53 +2,44 @@ use crate::job::{Job, Status};
 use std::collections::BinaryHeap;
 use uuid::Uuid;
 
-#[derive(Default)]
 pub struct QueueManager {
     heap: BinaryHeap<Job>,
-    db_path: String,
+    snapshot_tx: Option<std::sync::mpsc::Sender<Vec<Job>>>,
 }
 
 #[allow(dead_code)]
 impl QueueManager {
     pub fn new() -> Self {
-        Self::with_path("queue.json")
-    }
-
-    pub fn with_path(path: &str) -> Self {
-        let mut heap = BinaryHeap::new();
-        if !path.is_empty() {
-            if let Ok(data) = std::fs::read_to_string(path) {
-                if let Ok(jobs) = serde_json::from_str::<Vec<Job>>(&data) {
-                    heap = BinaryHeap::from(jobs);
-                    println!("Loaded {} jobs from {}", heap.len(), path);
-                }
-            }
-        }
-
         QueueManager {
-            heap,
-            db_path: path.to_string(),
+            heap: BinaryHeap::new(),
+            snapshot_tx: None,
         }
     }
 
-    fn save_to_disk(&self) {
-        if self.db_path.is_empty() { return; }
+    pub fn set_persistence(&mut self, tx: std::sync::mpsc::Sender<Vec<Job>>) {
+        self.snapshot_tx = Some(tx);
+    }
 
-        let jobs: Vec<&Job> = self.heap.iter().collect();
-        if let Ok(json) = serde_json::to_string_pretty(&jobs) {
-            let _ = std::fs::write(&self.db_path, json);
+    pub fn load_from_vec(&mut self, jobs: Vec<Job>) {
+        self.heap = BinaryHeap::from(jobs);
+    }
+
+    fn notify_persistence(&mut self) {
+        if let Some(tx) = self.snapshot_tx.clone() {
+            let snapshot = self.snapshot();
+            let _ = tx.send(snapshot);
         }
     }
 
     pub fn push(&mut self, job: Job) {
         self.heap.push(job);
-        self.save_to_disk();
+        self.notify_persistence();
     }
 
     pub fn pop(&mut self) -> Option<Job> {
         let job = self.heap.pop();
         if job.is_some() {
-            self.save_to_disk();
+            self.notify_persistence();
         }
         job
     }
@@ -60,7 +51,7 @@ impl QueueManager {
             Some(i) => {
                 let removed = all.remove(i);
                 self.heap = BinaryHeap::from(all);
-                self.save_to_disk();
+                self.notify_persistence();
                 Some(removed)
             }
             None => {
@@ -84,7 +75,7 @@ impl QueueManager {
             }
         }
         if !ready.is_empty() {
-             self.save_to_disk();
+            self.notify_persistence();
         }
         ready
     }
@@ -96,7 +87,7 @@ impl QueueManager {
             Some(job) => {
                 job.status = new_status;
                 self.heap = BinaryHeap::from(all);
-                self.save_to_disk();
+                self.notify_persistence();
                 true
             }
             None => {

@@ -1,5 +1,6 @@
 use scheduler::engine::TimePriorityEngine;
 use scheduler::job::Job;
+use scheduler::persistence_manager::PersistenceManager;
 use scheduler::queue::QueueManager;
 use scheduler::tui;
 use std::sync::{Arc, Mutex, mpsc};
@@ -7,8 +8,17 @@ use std::thread;
 
 fn main() -> std::io::Result<()> {
     println!("Initializing Scheduler Component...");
+    let persistence = PersistenceManager::new("queue.json");
+    let loaded_jobs = persistence.load_jobs();
+
+    let mut q = QueueManager::new();
+    q.load_from_vec(loaded_jobs);
+    let snapshot_tx = persistence.start_memory_snapshot();
+    q.set_persistence(snapshot_tx);
+
+    let queue = Arc::new(Mutex::new(q));
+
     // Channel from the Time & Priority Engine to the Worker Executor
-    let queue = Arc::new(Mutex::new(QueueManager::new()));
     let (worker_tx, worker_rx) = mpsc::channel();
     let (log_tx, log_rx) = mpsc::channel();
 
@@ -29,17 +39,19 @@ fn main() -> std::io::Result<()> {
         worker.start(worker_rx, log_tx);
     });
 
-    // Previous code: schedule demo jobs (unchanged logic)
-    let now = chrono::Utc::now().timestamp();
-    if let Ok(mut q) = queue.lock() {
-        if let Ok(j1) = Job::new(now + 1, 5, "Backup Database", "backup_fn") {
-            q.push(j1);
-        }
-        if let Ok(j2) = Job::new(now + 3, 1, "Send Emails", "email_fn") {
-            q.push(j2);
-        }
-        if let Ok(j3) = Job::new(now + 1, 1, "Urgent Hotfix", "hotfix_fn") {
-            q.push(j3);
+    // Previous code: schedule demo jobs only if queue is empty
+    if queue.lock().unwrap().is_empty() {
+        let now = chrono::Utc::now().timestamp();
+        if let Ok(mut q) = queue.lock() {
+            if let Ok(j1) = Job::new(now + 1, 5, "Backup Database", "backup_fn") {
+                q.push(j1);
+            }
+            if let Ok(j2) = Job::new(now + 3, 1, "Send Emails", "email_fn") {
+                q.push(j2);
+            }
+            if let Ok(j3) = Job::new(now + 1, 1, "Urgent Hotfix", "hotfix_fn") {
+                q.push(j3);
+            }
         }
     }
 
