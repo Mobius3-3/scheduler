@@ -43,8 +43,8 @@ mod tests {
         let sender = manager.start_memory_snapshot();
 
         let now = chrono::Utc::now().timestamp();
-        let job1 = Job::new(now + 1000, 1, "Task 1", "func1").unwrap();
-        let mut job2 = Job::new(now + 2000, 2, "Task 2", "func2").unwrap();
+        let job1 = Job::new(now + 1000, 1, "Task 1", "func1", 3).unwrap();
+        let mut job2 = Job::new(now + 2000, 2, "Task 2", "func2", 3).unwrap();
         job2.status = Status::Running;
 
         let snapshot = vec![job1.clone(), job2.clone()];

@@ -183,7 +183,7 @@ impl AppState {
             }
         };
 
-        match Job::new(execution_time, priority, desc, func) {
+        match Job::new(execution_time, priority, desc, func, 3) {
             Ok(job) => {
                 if let Ok(mut q) = self.queue.lock() {
                     q.push(job);

@@ -2,12 +2,17 @@ use scheduler::engine::TimePriorityEngine;
 use scheduler::job::Job;
 use scheduler::persistence_manager::PersistenceManager;
 use scheduler::queue::QueueManager;
+use scheduler::telemetry;
 use scheduler::tui;
 use std::sync::{Arc, Mutex, mpsc};
 use std::thread;
 
 fn main() -> std::io::Result<()> {
-    println!("Initializing Scheduler Component...");
+    // Initialize Telemetry
+    let _guard = telemetry::init_telemetry();
+    tracing::info!("Scheduler Component Initialized!");
+    telemetry::log_resource_usage();
+
     let persistence = PersistenceManager::new("queue.json");
     let loaded_jobs = persistence.load_jobs();
 
@@ -43,17 +48,20 @@ fn main() -> std::io::Result<()> {
     if queue.lock().unwrap().is_empty() {
         let now = chrono::Utc::now().timestamp();
         if let Ok(mut q) = queue.lock() {
-            if let Ok(j1) = Job::new(now + 1, 5, "Backup Database", "backup_fn") {
+            if let Ok(j1) = Job::new(now + 1, 5, "Backup Database", "backup_fn", 3) {
                 q.push(j1);
             }
-            if let Ok(j2) = Job::new(now + 3, 1, "Send Emails", "email_fn") {
+            if let Ok(j2) = Job::new(now + 3, 1, "Send Emails", "email_fn", 1) {
                 q.push(j2);
             }
-            if let Ok(j3) = Job::new(now + 1, 1, "Urgent Hotfix", "hotfix_fn") {
+            if let Ok(j3) = Job::new(now + 1, 1, "Urgent Hotfix", "hotfix_fn", 3) {
                 q.push(j3);
             }
         }
     }
+
+    tracing::info!("Jobs scheduled. Starting TUI...");
+    telemetry::log_resource_usage();
 
     let result = tui::run_tui(
         queue,

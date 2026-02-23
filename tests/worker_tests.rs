@@ -11,10 +11,15 @@ use std::time::Duration;
 mod tests {
     use super::*;
     // We use a static atomic to track if the function was called
-    static WAS_CALLED: AtomicBool = AtomicBool::new(false);
+    static WAS_CALLED_REGISTRY: AtomicBool = AtomicBool::new(false);
+    static WAS_CALLED_CHANNEL: AtomicBool = AtomicBool::new(false);
 
-    fn test_task(_log_tx: std::sync::mpsc::Sender<String>) {
-        WAS_CALLED.store(true, Ordering::SeqCst);
+    fn test_task_registry(_log_tx: std::sync::mpsc::Sender<String>) {
+        WAS_CALLED_REGISTRY.store(true, Ordering::SeqCst);
+    }
+
+    fn test_task_channel(_log_tx: std::sync::mpsc::Sender<String>) {
+        WAS_CALLED_CHANNEL.store(true, Ordering::SeqCst);
     }
 
     #[test]
@@ -22,26 +27,28 @@ mod tests {
         let mut worker = Worker::new();
 
         // 1. Register our test function
-        worker.register("test_func", test_task);
+        worker.register("test_func", test_task_registry);
 
         // 2. Create a job that is ready to run (execution_time = 0)
-        let job = Job {
+        let mut job = Job {
             id: uuid::Uuid::new_v4(),
             function: "test_func".to_string(),
             description: "A test job for the registry".to_string(),
             priority: 1,
             execution_time: 0,
             status: Status::Pending,
+            max_retries: 3,
+            retry_count: 0,
         };
 
         // 3. Reset the flag and run the job
         let (log_tx, _log_rx) = mpsc::channel();
-        WAS_CALLED.store(false, Ordering::SeqCst);
-        worker.run_job(&job, log_tx);
+        WAS_CALLED_REGISTRY.store(false, Ordering::SeqCst);
+        worker.run_job(&mut job, log_tx);
 
         // 4. Assert the function was triggered
         assert!(
-            WAS_CALLED.load(Ordering::SeqCst),
+            WAS_CALLED_REGISTRY.load(Ordering::SeqCst),
             "The registered function should have been executed"
         );
     }
@@ -50,27 +57,29 @@ mod tests {
     fn test_unknown_function_graceful_failure() {
         let worker = Worker::new(); // No functions registered
 
-        let job = Job {
+        let mut job = Job {
             id: uuid::Uuid::new_v4(),
             function: "missing_func".to_string(),
             description: "A test job for the registry".to_string(),
             priority: 2,
             execution_time: 0,
             status: Status::Pending,
+            max_retries: 3,
+            retry_count: 0,
         };
 
         // Should not panic, just log an error
         let (log_tx, _log_rx) = mpsc::channel();
-        worker.run_job(&job, log_tx);
+        worker.run_job(&mut job, log_tx);
     }
 
     #[test]
     fn test_worker_start_channel() {
         let mut worker = Worker::new();
-        worker.register("test_func", test_task);
+        worker.register("test_func", test_task_channel);
 
         let (tx, rx) = mpsc::channel();
-        WAS_CALLED.store(false, Ordering::SeqCst);
+        WAS_CALLED_CHANNEL.store(false, Ordering::SeqCst);
 
         let (log_tx, _log_rx) = mpsc::channel();
 
@@ -86,6 +95,8 @@ mod tests {
             priority: 1,
             execution_time: 0,
             status: Status::Pending,
+            max_retries: 3,
+            retry_count: 0,
         };
 
         tx.send(job).unwrap();
@@ -95,7 +106,7 @@ mod tests {
 
         // Assert the function was executed
         assert!(
-            WAS_CALLED.load(Ordering::SeqCst),
+            WAS_CALLED_CHANNEL.load(Ordering::SeqCst),
             "The registered function should have been executed via channel"
         );
     }
